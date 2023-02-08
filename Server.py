@@ -5,6 +5,7 @@ from threading import Thread
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 5002 # port we want to use
 separator_token = "<SEP>" # we will use this to separate the client name & message
+ipCheck = "10.10.10.10"
 
 # initialize list/set of all connected client's sockets
 client_sockets = set()
@@ -43,17 +44,15 @@ def listen_for_client(cs):
 
 
 while True:
-    # we keep listening for new connections all the time
-    client_socket, client_address = s.accept()
-    print(f"[+] {client_address} connected.")
-    # add the new connected client to connected sockets
-    client_sockets.add(client_socket)
-    # start a new thread that listens for each client's messages
-    t = Thread(target=listen_for_client, args=(client_socket,))
-    # make the thread daemon so it ends whenever the main thread ends
-    t.daemon = True
-    # start the thread
-    t.start()
+    if client_address == ipCheck:
+        client_socket, client_address = s.accept()
+        print(f"[+] {client_address} connected.")
+        client_sockets.add(client_socket)
+        t = Thread(target=listen_for_client, args=(client_socket,))
+        t.daemon = True
+        t.start()
+    else:
+        print("Access denied: IP not authorised")
 
 # close client sockets
 for cs in client_sockets:
